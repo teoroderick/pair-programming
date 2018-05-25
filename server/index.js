@@ -64,15 +64,18 @@ app.get('/', function(req, res) {
 
     // Retrieving Curated Lists
     let pManyList = axios.get(`https://api.spreaker.com/v2/explore/lists?country=US&limit=${limit}`);
+    // Declare randomList outside the axios requests so that it is retained across requests.
+    let randomList;
     pManyList.then(result => {
         let randomIndex = generateRandomNumber(limit-1);
-        let randomList = result.data.response.items[randomIndex];
+        randomList = result.data.response.items[randomIndex];
+        //console.log(randomList);
         let pOneList = axios.get(`https://api.spreaker.com/v2/explore/lists/${randomList.list_id}/items?${limit}`);
         return pOneList;
     })
-    // Just one List of Shows
+    // Just one List of Shows - showList, and then include the name of the list as well - listName
     .then(result => {
-        res.json(result.data);
+        res.json({showList : result.data, listName : randomList.name});
     })
     .catch(error => {
         console.log(`Couldn't get data from source because of error:\n ${error}`);
